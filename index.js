@@ -5,7 +5,7 @@ var parse           = require("babylon").parse;
 var t               = require("babel-types");
 var tt              = require("babylon").tokTypes;
 var traverse        = require("babel-traverse").default;
-var codeFrame       = require("babel-code-frame");
+var codeFrame       = require("babel-code-frame").default;
 
 var hasPatched = false;
 var eslintOptions = {};
@@ -95,6 +95,7 @@ function monkeypatch(modules) {
     "ObjectPattern",
     "RestElement"
   ]);
+
   var visitorKeysMap = Object.keys(t.VISITOR_KEYS).reduce(function(acc, key) {
     var value = t.VISITOR_KEYS[key];
     if (flowFlippedAliasKeys.indexOf(value) === -1) {
@@ -102,6 +103,9 @@ function monkeypatch(modules) {
     }
     return acc;
   }, {});
+
+  visitorKeysMap["ExperimentalRestProperty"] = visitorKeysMap["RestElement"];
+  visitorKeysMap["ExperimentalSpreadProperty"] = visitorKeysMap["SpreadElement"];
 
   var propertyTypes = {
     // loops
@@ -129,6 +133,7 @@ function monkeypatch(modules) {
       return;
     }
 
+
     // can have multiple properties
     for (var i = 0; i < visitorValues.length; i++) {
       var visitorValue = visitorValues[i];
@@ -138,6 +143,7 @@ function monkeypatch(modules) {
       if (propertyType == null || nodeProperty == null) {
         continue;
       }
+
       if (propertyType.type === "loop") {
         for (var j = 0; j < nodeProperty.length; j++) {
           if (Array.isArray(propertyType.values)) {
@@ -384,7 +390,6 @@ exports.parseNoPatch = function (code, options) {
       "jsx",
       "asyncFunctions",
       "asyncGenerators",
-      "classConstructorCall",
       "classProperties",
       "decorators",
       "doExpressions",

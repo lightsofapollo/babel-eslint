@@ -213,6 +213,7 @@ function strictSuite () {
         eslint: baseEslintOpts
       }, (err, report) => {
         if (err) return done(err);
+        console.log(report);
         assert(stripAnsi(report[0].message).indexOf("^\n  5 |") > -1);
         done();
       });
